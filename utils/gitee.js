@@ -8,15 +8,16 @@ const $ = require('cheerio')
  */
 const getCommitInfoByDay = (userName,dayList) => {
     return new Promise((resolve,reject)=>{
-        request.get(`https://github.com/${userName}`, {timeout: 20000},function optionalCallback(err, httpResponse, body) {
-            if (err) {
-                reject('连接失败')
-            } else {
-                resolve( dayList.map( day => {
-
-                    let rs = $(body).find(`.day[data-date='${day}']`)
+        request.get(`https://gitee.com/${userName}`, {timeout: 20000},function optionalCallback(err, httpResponse, body) {
+          if (err) {
+            reject('连接失败')``
+          } else {
+            resolve( dayList.map( day => {
+              
+              console.log('-------------',day)
+              let rs = $(body).find(`.contribution-box .box[date='${day}']`)
                     if( rs && rs.length===1) {
-                        return {day,commit: $(rs).attr('data-count')}
+                        return {day,commit: parseInt( $(rs).attr('data-content'))}
                     } else {
                         return {day,commit: '未知'}
 

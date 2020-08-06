@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>look</title>
+   <!-- 引入样式 -->
+<link rel="stylesheet" href="https://unpkg.com/vue-easytable/umd/css/index.css">
+  <style>
+    .container{display: flex;flex-direction: column;}
+    .box{display: flex;}
+    .num{padding:2px; background-color: blueviolet;margin:2px;}
+    .tag{position: relative;}
+    .date{display: none;position: absolute;}
+    .tag:hover .date{display: block}
+  </style>
+</head>
+
+<body>
+  <h1>look</h1>
+  <div id="app">
+    <v-table
+      is-horizontal-resize
+      :multiple-sort="false"
+      style="width:100%"
+      :height="800"
+      :columns="columns"
+      :table-data="tableData"
+      :show-vertical-border="false"
+      row-hover-color="#eee"
+      row-click-color="#edf7ff"
+    ></v-table>
+
+  </div>
+</body>
+
+<body>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  
+  <!-- 引入组件库 -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
+  <script src="https://unpkg.com/vue-easytable/umd/js/index.js"></script>
+  <script>
+    const getAll = () => $.get('./getJson')
+    new Vue({
+      el: '#app',
+      data: {
+        list: [],
+        tableData: [
+                    {"name":"赵伟","tel":"156*****1987","hobby":"钢琴、书法、唱歌","address":"上海市黄浦区金陵东路569号17楼"},
+                    {"name":"李伟","tel":"182*****1538","hobby":"钢琴、书法、唱歌","address":"上海市奉贤区南桥镇立新路12号2楼"},
+                    {"name":"孙伟","tel":"161*****0097","hobby":"钢琴、书法、唱歌","address":"上海市崇明县城桥镇八一路739号"},
+                    {"name":"周伟","tel":"197*****1123","hobby":"钢琴、书法、唱歌","address":"上海市青浦区青浦镇章浜路24号"},
+                    {"name":"吴伟","tel":"183*****6678","hobby":"钢琴、书法、唱歌","address":"上海市松江区乐都西路867-871号"}
+                ],
+                columns: [
+                    {orderBy:'asc',field: 'name', title:'姓名', width: 100, titleAlign: 'center',columnAlign:'center'},
+                    {orderBy:'asc',field: 'tel', title: '手机号码', width: 260, titleAlign: 'center',columnAlign:'center'},
+                    {orderBy:'asc',field: 'hobby', title: '爱好', width: 330, titleAlign: 'center',columnAlign:'center'},
+                    {orderBy:'asc',field: 'address', title: '地址', titleAlign: 'center',columnAlign:'left'}
+                ]
+      },
+      async mounted() {
+        const result = await getAll()
+        this.list = result
+        this.columns = this.buildColumn(result)
+        this.tableData = this.buildTableData(result)
+        
+      },
+      methods: {
+        buildTableData (result) {
+          return result.map(item => {
+            const days = {}
+            let all = 0
+            item.data.forEach(it => {
+              days[it.day] = it.commit
+              all += it.commit
+            })
+            return {
+              name: item.nickname,
+              address: 'https://gitee.com/'+item.userName,
+              ...days,
+              all
+            }
+          })
+        },
+        buildColumn(result) {
+          const arr = [{
+            field: 'name',
+            title:'姓名',
+            orderBy:'asc',
+            width: 100, titleAlign: 'center',columnAlign:'center'
+          },
+          {
+            field: 'address',
+            title:'地址',
+            orderBy:'asc',
+            titleAlign: 'center',columnAlign:'center',
+            formatter: function (rowData,rowIndex,pagingIndex,field) {
+              // console.log(rowData,field)
+              return `<a target="_blank" href="${rowData[field]}">${rowData[field]}</a>`
+            }
+          }]
+
+          if ( this.list[0] ) {
+            const days = this.list[0].data.map(it => {
+              return {
+                orderBy:'asc',
+                field: it.day,
+                title:it.day,
+                width: 100, titleAlign: 'center',columnAlign:'center'
+              }
+            })
+            arr.push(...days)
+          }
+          arr.push({
+            field: 'all',
+            title:'总计',
+            orderBy:'asc',
+            width: 90, titleAlign: 'center',columnAlign:'center'
+          })
+          return arr
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
